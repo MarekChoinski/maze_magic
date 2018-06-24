@@ -5,20 +5,36 @@ import copy
 
 cap = cv2.VideoCapture(0)
 
+'''
+def mask_to_text_and_to_file(mask):
+    result = [['X'] * len(mask[0])] * len(mask)
+    
+    
+    str_text = ""
+
+    for row in mask:
+        for pixel in row:
+            if pixel == 255:
+                str_text = str_text + '#'
+            else:
+                str_text = str_text + '.'
+        str_text = str_text + '\n'
+
+
+    with open("data.txt", "w") as f:
+        f.write(str_text)
+'''
+
 
 def mask_to_text(mask):
-    result = [[None] * len(mask[0])] * len(mask)
-
-
+    result = [['X'] * len(mask[0])] * len(mask)
 
     for row_num, row in enumerate(mask):
         for pixel_num, pixel in enumerate(row):
-            if pixel == 0:
-                result[row_num][pixel_num] = ' '
-            else:
+            if pixel == 255:
                 result[row_num][pixel_num] = '#'
-
-    print(result)
+            else:
+                result[row_num][pixel_num] = ' '
 
     return result
 
@@ -49,8 +65,8 @@ def show_end_points(frame):
 
     if len(positions) == 2:
         copy_frame = copy.copy(original_frame)
-        cv2.circle(copy_frame, (positions[0][0], positions[0][1]),  positions[0][2], (0,255,0), -1)
-        cv2.circle(copy_frame, (positions[1][0], positions[1][1]),  positions[1][2], (0,255,0), -1)
+        cv2.circle(copy_frame, (positions[0][0], positions[0][1]), positions[0][2], (0, 255, 0), -1)
+        cv2.circle(copy_frame, (positions[1][0], positions[1][1]), positions[1][2], (0, 255, 0), -1)
         original_frame = cv2.addWeighted(original_frame, 0.7, copy_frame, 0.3, 0)
     else:
         original_frame = cv2.addWeighted(original_frame, 0.7, original_frame, 0.3, 0)
@@ -72,15 +88,14 @@ def position_of_end_points(mask):
     positions = []
 
     if len(contours) >= 2:
-
         sorted_contours = sorted(contours, key=cv2.contourArea)
 
         # find the biggest area point
         # todo not sure if sorted ascend
         x, y, w, h = cv2.boundingRect(sorted_contours[-2])
-        positions.append( (int(round(x+(w/2))), int(round(y+(h/2) )), int(round(max(w, h)) )))
+        positions.append((int(round(x + (w / 2))), int(round(y + (h / 2))), int(round(max(w, h)))))
         x, y, w, h = cv2.boundingRect(sorted_contours[-1])
-        positions.append( (int(round(x+(w/2))), int(round(y+(h/2) )), int(round(max(w, h)) )))
+        positions.append((int(round(x + (w / 2))), int(round(y + (h / 2))), int(round(max(w, h)))))
 
     return positions
 
@@ -130,25 +145,26 @@ def mazeMagic():
 
     backtorgb = cv2.cvtColor(final_mask, cv2.COLOR_GRAY2RGB)
 
-
-
     # original frame is overlayed by detected path
     # original_frame = cv2.addWeighted(original_frame, 1.0, backtorgb, 0.1, 0)
 
-    # mask_to_text(final_mask)
     positions = position_of_end_points(mask1)
 
     # print(positions)
-    #print(positions[0][0],positions[0][1], positions[0][2])
+    # print(positions[0][0],positions[0][1], positions[0][2])
 
     copy_frame = copy.copy(original_frame)
-    cv2.circle(copy_frame, (positions[0][0], positions[0][1]),  positions[0][2], (0,255,0), -1)
-    cv2.circle(copy_frame, (positions[1][0], positions[1][1]),  positions[1][2], (0,255,0), -1)
+    cv2.circle(copy_frame, (positions[0][0], positions[0][1]), positions[0][2], (0, 255, 0), -1)
+    cv2.circle(copy_frame, (positions[1][0], positions[1][1]), positions[1][2], (0, 255, 0), -1)
     original_frame = cv2.addWeighted(original_frame, 0.5, copy_frame, 0.1, 0)
 
+    mask_to_text(final_maze_masked - final_mask)
+
     # show windows
-    cv2.imshow('mask', final_mask)
-    cv2.imshow('mask2', original_frame)
+    cv2.imshow('mask', final_maze_masked)
+    # cv2.imshow('mask3', final_edges)
+    # cv2.imshow('mask2', original_frame)
+
     # cv2.imshow('edges_masked', final_maze_masked - final_mask)
 
     cv2.waitKey(0)
@@ -180,4 +196,3 @@ if __name__ == '__main__':
                 cv2.destroyAllWindows()
                 mazeMagic()
                 break
-
