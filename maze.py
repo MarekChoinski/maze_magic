@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 from time import sleep
 import copy
+import solver
 
 cap = cv2.VideoCapture(0)
 
@@ -35,6 +36,7 @@ def mask_to_text(mask):
                 result[row_num][pixel_num] = '#'
             else:
                 result[row_num][pixel_num] = ' '
+
 
     return result
 
@@ -161,14 +163,45 @@ def mazeMagic():
     mask_to_text(final_maze_masked - final_mask)
 
     # show windows
-    cv2.imshow('mask', final_maze_masked)
+    # cv2.imshow('mask', final_maze_masked)
     # cv2.imshow('mask3', final_edges)
     # cv2.imshow('mask2', original_frame)
 
     # cv2.imshow('edges_masked', final_maze_masked - final_mask)
 
+
+
+    labirynth = mask_to_text(final_maze_masked)
+    pos = position_of_end_points(final_maze_masked)
+    print("no nwm", pos)
+    if len(pos) != 0:
+        print("Takie pozycje: ",(pos[0][0], pos[0][1]), (pos[1][0], pos[1][1]))
+        path = solver.solve(labirynth, (pos[0][0], pos[0][1]), (pos[1][0], pos[1][1]))
+        original_frame = draw_path_on_frame(original_frame, path)
+
+    print(path)
+
+    cv2.imshow('mask2', original_frame)
+
+
+
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+
+def show_path(frame):
+    labirynth = mask_to_text(frame)
+
+def draw_path_on_frame(frame, path):
+    blank_image = np.zeros((len(frame), len(frame[0]), 3), np.uint8)
+    for p in path:
+        blank_image[p[0]][p[1]] = (255,255,255)
+
+    frame =  cv2.addWeighted(frame, 0, blank_image, 1, 0)
+
+    return frame
+
+
+# path = solver.solve(result, (1, 8), (1, 18))
 
 
 if __name__ == '__main__':

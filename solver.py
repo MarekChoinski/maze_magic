@@ -1,80 +1,100 @@
 import numpy as np
 from collections import deque
 
+
+'''
+get: matrix of chars, tuples of position of start and end
+return: 
+'''
+
+'''
 labirynth = [
-    ['#','#','#','#','#','#','#'],
-    ['#','S',' ',' ',' ',' ','#'],
-    ['#',' ','#',' ','#','#','#'],
-    ['#',' ','#',' ','#',' ','#'],
-    ['#',' ','#','#','#',' ','#'],
-    ['#',' ',' ',' ',' ','E','#'],
-    ['#','#','#','#','#','#','#'],
-]
+    ['#', '#', '#', '#', '#', '#', '#'],
+    ['#', 'S', ' ', ' ', ' ', ' ', '#'],
+    ['#', ' ', '#', ' ', '#', '#', '#'],
+    ['#', ' ', '#', ' ', '#', ' ', '#'],
+    ['#', ' ', '#', '#', '#', ' ', '#'],
+    ['#', ' ', ' ', ' ', ' ', 'E', '#'],
+    ['#', '#', '#', '#', '#', '#', '#'],
+]'''
 
-size = 7
+def solve(labirynth, start, end):
 
-# find end and start
-# we search for S and E
+    size = len(labirynth)
 
-# indexes of S and E
-start = (-1, -1)
-end = (-1, -1)
+    print("wielkosc ", size)
 
-for i, row in enumerate(labirynth):
-    for j, x in enumerate(row):
-        if x == 'S':
-            start = (i, j)
-        if x == 'E':
-            end = (i, j)
-
-# change E to free field
-
-labirynth[end[0]][end[1]] = ' '
+    labirynth[start[0]][start[1]] = 'S'
+    labirynth[end[0]][end[1]] = 'E'
 
 
-print(start, end)
 
-# make queue
+    # find end and start
+    # we search for S and E
 
-queue = deque()
+    # indexes of S and E
+    '''
+    start = (-1, -1)
+    end = (-1, -1)
 
-queue.append(start)
+    for i, row in enumerate(labirynth):
+        for j, x in enumerate(row):
+            if x == 'S':
+                start = (i, j)
+            if x == 'E':
+                end = (i, j)
+                '''
 
-find = False
+    # change E to free field
 
-while len(queue) != 0:
-    index = queue.popleft()
+    labirynth[end[0]][end[1]] = ' '
 
-    if index == end:
-        find = True
-        break
+    print(start, end)
 
-    #up
-    if labirynth[index[0]-1][index[1]]==' ':
-        labirynth[index[0]-1][index[1]]='d'
-        temp = (index[0]-1, index[1])
-        queue.append(temp)
+    # make queue
 
-    #down
-    if labirynth[index[0]+1][index[1]]==' ':
-        labirynth[index[0]+1][index[1]]='u'
-        temp = (index[0]+1, index[1])
-        queue.append(temp)
-    
-    #left
-    if labirynth[index[0]][index[1]-1]==' ':
-        labirynth[index[0]][index[1]-1]='r'
-        temp = (index[0], index[1]-1)
-        queue.append(temp)
+    queue = deque()
 
-    #right
-    if labirynth[index[0]][index[1]+1]==' ':
-        labirynth[index[0]][index[1]+1]='l'
-        temp = (index[0], index[1]+1)
-        queue.append(temp)
+    queue.append(start)
 
+    find = False
 
-# go through solution
+    while len(queue) != 0:
+        index = queue.popleft()
+
+        if index == end:
+            find = True
+            break
+
+        # up
+        if labirynth[index[0] - 1][index[1]] == ' ':
+            labirynth[index[0] - 1][index[1]] = 'd'
+            temp = (index[0] - 1, index[1])
+            queue.append(temp)
+
+        # down
+        if labirynth[index[0] + 1][index[1]] == ' ':
+            labirynth[index[0] + 1][index[1]] = 'u'
+            temp = (index[0] + 1, index[1])
+            queue.append(temp)
+
+        # left
+        if labirynth[index[0]][index[1] - 1] == ' ':
+            labirynth[index[0]][index[1] - 1] = 'r'
+            temp = (index[0], index[1] - 1)
+            queue.append(temp)
+
+        # right
+        if labirynth[index[0]][index[1] + 1] == ' ':
+            labirynth[index[0]][index[1] + 1] = 'l'
+            temp = (index[0], index[1] + 1)
+            queue.append(temp)
+
+    # go through solution
+
+    print("dziala bez kitu xD")
+
+    path = []
 
     shortest_path = end
     if labirynth[shortest_path[0]][shortest_path[1]] == ' ':
@@ -82,34 +102,38 @@ while len(queue) != 0:
     else:
         is_solved = True
 
+        path.append(shortest_path)
+
         while labirynth[shortest_path[0]][shortest_path[1]] != 'S':
 
             if labirynth[shortest_path[0]][shortest_path[1]] == 'u':
+                path.append(shortest_path)
                 labirynth[shortest_path[0]][shortest_path[1]] = 'U'
-                shortest_path = (shortest_path[0]-1, shortest_path[1])
+                shortest_path = (shortest_path[0] - 1, shortest_path[1])
 
             if labirynth[shortest_path[0]][shortest_path[1]] == 'd':
+                path.append(shortest_path)
                 labirynth[shortest_path[0]][shortest_path[1]] = 'D'
-                shortest_path = (shortest_path[0]+1, shortest_path[1])
+                shortest_path = (shortest_path[0] + 1, shortest_path[1])
 
             if labirynth[shortest_path[0]][shortest_path[1]] == 'l':
+                path.append(shortest_path)
                 labirynth[shortest_path[0]][shortest_path[1]] = 'L'
-                shortest_path = (shortest_path[0], shortest_path[1]-1)
+                shortest_path = (shortest_path[0], shortest_path[1] - 1)
 
             if labirynth[shortest_path[0]][shortest_path[1]] == 'r':
+                path.append(shortest_path)
                 labirynth[shortest_path[0]][shortest_path[1]] = 'R'
-                shortest_path = (shortest_path[0], shortest_path[1]+1)
+                shortest_path = (shortest_path[0], shortest_path[1] + 1)
 
+    labirynth[end[0]][end[1]] = 'E'
 
-labirynth[end[0]][end[1]] = 'E'
+    return path
 
 
 '''
-for row in labirynth:
-    for x in row:
-        print(x, end='')
-    print('\n')
-
-
-print(is_solved)
+    for row in labirynth:
+        for x in row:
+            print(x, end='')
+        print('\n')
 '''
