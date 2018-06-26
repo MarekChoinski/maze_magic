@@ -140,95 +140,6 @@ def position_of_end_points(mask):
     return positions
 
 
-def mazeMagic():
-    # to achieve better edgy detection we take three frame
-    _, frame1 = cap.read()
-    sleep(0.2)
-    _, frame2 = cap.read()
-    sleep(0.2)
-    _, frame3 = cap.read()
-    sleep(0.2)
-
-    # save normal frame
-    original_frame = frame1
-
-    # take  e d g y  frames
-    edges1 = cv2.Canny(frame1, 100, 200)
-    edges2 = cv2.Canny(frame2, 100, 200)
-    edges3 = cv2.Canny(frame3, 200, 200)
-
-    # convert color scale to HSV
-    frame1 = cv2.cvtColor(frame1, cv2.COLOR_BGR2HSV)
-    frame2 = cv2.cvtColor(frame2, cv2.COLOR_BGR2HSV)
-    frame3 = cv2.cvtColor(frame3, cv2.COLOR_BGR2HSV)
-
-    # Define range of green color in HSV
-    lower_green = np.array([40, 100, 85])
-    upper_green = np.array([75, 255, 255])
-
-    # Threshold the HSV image to get only blue colors
-    mask1 = cv2.inRange(frame1, lower_green, upper_green)
-    mask2 = cv2.inRange(frame2, lower_green, upper_green)
-    mask3 = cv2.inRange(frame3, lower_green, upper_green)
-
-    # connect all pieces to one
-    final_edges = edges1 + edges2 + edges3
-    final_mask = mask1 + mask2 + mask3
-
-    # dilate final pieces for better effect
-    kernel = np.ones((3, 3), np.uint8)
-    final_edges = cv2.dilate(final_edges, kernel, iterations=1)
-    final_mask = cv2.dilate(final_mask, kernel, iterations=2)
-
-    # substrate walls with start and end
-    final_maze_masked = final_edges - final_mask
-
-    backtorgb = cv2.cvtColor(final_mask, cv2.COLOR_GRAY2RGB)
-
-    # original frame is overlayed by detected path
-    # original_frame = cv2.addWeighted(original_frame, 1.0, backtorgb, 0.1, 0)
-
-    positions = position_of_end_points(mask1)
-
-    # print(positions)
-    # print(positions[0][0],positions[0][1], positions[0][2])
-
-    copy_frame = copy.copy(original_frame)
-    cv2.circle(copy_frame, (positions[0][0], positions[0][1]), positions[0][2], (0, 255, 0), -1)
-    cv2.circle(copy_frame, (positions[1][0], positions[1][1]), positions[1][2], (0, 255, 0), -1)
-    original_frame = cv2.addWeighted(original_frame, 0.5, copy_frame, 0.1, 0)
-
-    mask_to_text(final_maze_masked - final_mask)
-
-    # show windows
-    # cv2.imshow('mask', final_maze_masked)
-    # cv2.imshow('mask3', final_edges)
-    # cv2.imshow('mask2', original_frame)
-
-    # cv2.imshow('edges_masked', final_maze_masked - final_mask)
-
-    labirynth = mask_to_text(final_maze_masked)
-    pos = position_of_end_points(final_maze_masked)
-    print(pos)
-    original_frame = draw_path_on_frame(original_frame, pos)
-    print("Pierwsze kolo:", (pos[0][0], pos[0][1]), "\nDrugie kolo:", (pos[1][0], pos[1][1]), '\n', )
-    print(len(labirynth), len(labirynth[0]))
-    if len(pos) == 2:
-        print("Takie pozycje: ", (pos[0][0], pos[0][1]), (pos[1][0], pos[1][1]))
-        path = solver.solve(labirynth, (pos[0][0], pos[0][1]), (pos[1][0], pos[1][1]))
-        if len(path) != 0:
-            original_frame = draw_path_on_frame(original_frame, path)
-        else:
-            print("pusta droga")
-
-    print(path)
-
-    cv2.imshow('mask2', original_frame)
-
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-
-
 def show_path(frame):
     labirynth = mask_to_text(frame)
 
@@ -245,11 +156,11 @@ def draw_path_on_frame(frame, path):
 
 def what_the_hell():
     _, frame1 = cap.read()
-    sleep(0.2)
+    #sleep(0.2)
     _, frame2 = cap.read()
-    sleep(0.2)
+    #sleep(0.2)
     _, frame3 = cap.read()
-    sleep(0.2)
+    #sleep(0.2)
 
     # save normal frame
     original_frame = frame1
@@ -294,7 +205,7 @@ def what_the_hell():
         copy_frame = copy.copy(original_frame)
         cv2.circle(copy_frame, (positions[0][0], positions[0][1]), positions[0][2], (0, 255, 0), -1)
         cv2.circle(copy_frame, (positions[1][0], positions[1][1]), positions[1][2], (0, 255, 0), -1)
-        original_frame = cv2.addWeighted(original_frame, 0.5, copy_frame, 0.1, 0)
+        original_frame = cv2.addWeighted(original_frame, 1, copy_frame, 1, 0)
 
         # mask_to_text(final_maze_masked - final_mask)
 
@@ -305,24 +216,12 @@ def what_the_hell():
 
         original_frame = draw_path_on_frame(original_frame, path)
 
-        '''blank_image = np.zeros((len(original_frame), len(original_frame[0]), 3), np.uint8)
-
-blank_image[positions[0][1]][positions[0][0]] = (0, 255, 255)
-blank_image[positions[1][1]][positions[1][0]] = (0, 255, 255)
-
-for i, row in enumerate(labirynth):
-            for j, x in enumerate(row):
-                if labirynth[i][j] == '#':
-                    print(i, j)
-                    blank_image[i][j] = (255, 255, 255)'''
-
         #original_frame = cv2.addWeighted(original_frame, 1, blank_image, 1, 0)
 
     cv2.imshow('stuff sovled, kinda', original_frame)
-    cv2.imshow('cool-mask', final_maze_masked)
-
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    
+    #cv2.waitKey(0)
+    #cv2.destroyAllWindows()
 
 
 # path = solver.solve(result, (1, 8), (1, 18))
@@ -331,30 +230,17 @@ for i, row in enumerate(labirynth):
 if __name__ == '__main__':
     while True:
 
-        # Take each frame
-        goodFrame, frame = cap.read()
+        what_the_hell()
 
-        # check if frame is taken properly
-        if goodFrame:
-            # edges detection - used to extract the maze shape
-            edges = cv2.Canny(frame, 200, 200)
-
-            # todo should do this in every 100ms, not in 60 FPS XDD
-            frame = show_end_points(frame)
-            # frame = what_the_hell()
-
-            cv2.imshow('frame', frame)
-            # cv2.imshow('edges', edges)
-
-            k = cv2.waitKey(5) & 0xFF
-            if k == ord('q'):
-                cv2.destroyAllWindows()
-                break
-            elif k == ord('t'):
-                cv2.destroyAllWindows()
-                mazeMagic()
-                break
-            elif k == ord('/'):
-                cv2.destroyAllWindows()
-                what_the_hell()
-                break
+        k = cv2.waitKey(5) & 0xFF
+        if k == ord('q'):
+            cv2.destroyAllWindows()
+            break
+        elif k == ord('t'):
+            cv2.destroyAllWindows()
+            mazeMagic()
+            break
+        elif k == ord('/'):
+            cv2.destroyAllWindows()
+            what_the_hell()
+            break
