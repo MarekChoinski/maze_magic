@@ -4,71 +4,15 @@ from time import sleep
 import copy
 import solver
 
+import globals
+
+import threading
+
 cap = cv2.VideoCapture(0)
-
-'''
-def mask_to_text_and_to_file(mask):
-    result = [['X'] * len(mask[0])] * len(mask)
-    
-    
-    str_text = ""
-
-    for row in mask:
-        for pixel in row:
-            if pixel == 255:
-                str_text = str_text + '#'
-            else:
-                str_text = str_text + '.'
-        str_text = str_text + '\n'
-
-
-    with open("data.txt", "w") as f:
-        f.write(str_text)
-        
-        
-            #save file
-
-        
-'''
-
-'''
-    for row_num, row in enumerate(mask):
-        for pixel_num, pixel in enumerate(row):
-            if pixel == 255:
-                result[row_num][pixel_num] = '#'
-            else:
-                result[row_num][pixel_num] = '.'
-
-
-    str_text = ""
-
-    for row_num, row in enumerate(result):
-        for pixel_num, pixel in enumerate(row):
-            str_text = str_text + result[row_num][pixel_num]
-        str_text = str_text + '\n'
-        
-        
-        
-            str_text = ""
-
-    for row_num, row in enumerate(result):
-        for pixel_num, pixel in enumerate(row):
-            str_text = str_text + result[row_num][pixel_num]
-        str_text = str_text + '\n'
-
-    with open("dataxD.txt", "w") as f:
-        f.write(str_text)
-'''
-
-
-# result = [['X'] * (len(mask[0]))] * (len(mask))
-
+_, frame1 = cap.read()
 
 def mask_to_text(mask):
     result = [['x' for x in range(len(mask[0]))] for y in range(len(mask))]
-
-    # print("result:", len(result), len(result[0]))
-    # print("mask:", len(mask), len(mask[0]))
 
     for row_num, row in enumerate(mask):
         for pixel_num, pixel in enumerate(row):
@@ -78,10 +22,6 @@ def mask_to_text(mask):
                 result[row_num][pixel_num] = ' '
 
     return result
-
-
-def find_largest_groups_in_mask(mask):
-    pass
 
 
 def show_end_points(frame):
@@ -140,100 +80,89 @@ def position_of_end_points(mask):
     return positions
 
 
-def show_path(frame):
-    labirynth = mask_to_text(frame)
-
-
-def draw_path_on_frame(frame, path):
-    blank_image = np.zeros((len(frame), len(frame[0]), 3), np.uint8)
-    for p in path:
+def draw_path_on_frame():
+    blank_image = np.zeros((len(globals.frame1), len(globals.frame1[0]), 3), np.uint8)
+    for p in globals.path:
         blank_image[p[0]][p[1]] = (255, 255, 255)
 
-    frame = cv2.addWeighted(frame, 0.5, blank_image, 0.5, 0)
+    frame = cv2.addWeighted(globals.frame1, 0.5, blank_image, 0.5, 0)
 
     return frame
 
 
-def what_the_hell():
-    _, frame1 = cap.read()
-    #sleep(0.2)
-    _, frame2 = cap.read()
-    #sleep(0.2)
-    _, frame3 = cap.read()
-    #sleep(0.2)
-
-    # save normal frame
-    original_frame = frame1
-
-    # take  e d g y  frames
-    edges1 = cv2.Canny(frame1, 100, 200)
-    edges2 = cv2.Canny(frame2, 100, 200)
-    edges3 = cv2.Canny(frame3, 200, 200)
-
-    # convert color scale to HSV
-    frame1 = cv2.cvtColor(frame1, cv2.COLOR_BGR2HSV)
-    frame2 = cv2.cvtColor(frame2, cv2.COLOR_BGR2HSV)
-    frame3 = cv2.cvtColor(frame3, cv2.COLOR_BGR2HSV)
-
-    # Define range of green color in HSV
-    lower_green = np.array([40, 100, 85])
-    upper_green = np.array([75, 255, 255])
-
-    # Threshold the HSV image to get only blue colors
-    mask1 = cv2.inRange(frame1, lower_green, upper_green)
-    mask2 = cv2.inRange(frame2, lower_green, upper_green)
-    mask3 = cv2.inRange(frame3, lower_green, upper_green)
-
-    # connect all pieces to one
-    final_edges = edges1 + edges2 + edges3
-    final_mask = mask1 + mask2 + mask3
-
-    # dilate final pieces for better effect
-    kernel = np.ones((3, 3), np.uint8)
-    final_edges = cv2.dilate(final_edges, kernel, iterations=1)
-    final_mask = cv2.dilate(final_mask, kernel, iterations=2)
-
-    # substrate walls with start and end
-    final_maze_masked = final_edges - final_mask
-
-    positions = position_of_end_points(mask1)
-
-    print("poz1", positions)
-    # print(positions[0][0],positions[0][1], positions[0][2])
-
-    if len(positions) == 2:
-        copy_frame = copy.copy(original_frame)
-        cv2.circle(copy_frame, (positions[0][0], positions[0][1]), positions[0][2], (0, 255, 0), -1)
-        cv2.circle(copy_frame, (positions[1][0], positions[1][1]), positions[1][2], (0, 255, 0), -1)
-        original_frame = cv2.addWeighted(original_frame, 1, copy_frame, 1, 0)
-
-        # mask_to_text(final_maze_masked - final_mask)
-
-        labirynth = mask_to_text(final_maze_masked)
-        pos = positions
-
-        path = solver.solve(labirynth, (positions[0][0], positions[0][1]), (positions[1][0], positions[1][1]))
-
-        original_frame = draw_path_on_frame(original_frame, path)
-
-        #original_frame = cv2.addWeighted(original_frame, 1, blank_image, 1, 0)
-
-    cv2.imshow('stuff sovled, kinda', original_frame)
-    
-    #cv2.waitKey(0)
-    #cv2.destroyAllWindows()
+# Define range of green color in HSV
+lower_green = np.array([40, 100, 85])
+upper_green = np.array([75, 255, 255])
 
 
-# path = solver.solve(result, (1, 8), (1, 18))
+def maze_calculation_loop():
+
+
+    print('i t e r a t i o n')
+    while globals.running:
+        # take  e d g y  frames
+        edges1 = cv2.Canny(globals.frame1, 100, 200)
+
+        # convert color scale to HSV
+        copied_frame = copy.copy(globals.frame1)
+        copied_frame = cv2.cvtColor(copied_frame, cv2.COLOR_BGR2HSV)
+
+        # Threshold the HSV image to get only blue colors
+        mask1 = cv2.inRange(copied_frame, lower_green, upper_green)
+
+        # connect all pieces to one
+        final_edges = edges1
+        final_mask = mask1
+
+        # dilate final pieces for better effect
+        kernel = np.ones((3, 3), np.uint8)
+        final_edges = cv2.dilate(final_edges, kernel, iterations=1)
+        final_mask = cv2.dilate(final_mask, kernel, iterations=2)
+
+        # substrate walls with start and end
+        final_maze_masked = final_edges - final_mask
+
+        positions = position_of_end_points(mask1)
+
+        # print("poz1", positions)
+        # print(positions[0][0],positions[0][1], positions[0][2])
+
+        if len(positions) == 2:
+            #copy_frame = copied_frame # That's a qyucxk fix IMO
+            #cv2.circle(copy_frame, (positions[0][0], positions[0][1]), positions[0][2], (0, 255, 0), -1)
+            #cv2.circle(copy_frame, (positions[1][0], positions[1][1]), positions[1][2], (0, 255, 0), -1)
+            #original_frame = cv2.addWeighted(original_frame, 1, copy_frame, 1, 0)
+
+            # mask_to_text(final_maze_masked - final_mask)
+
+            labirynth = mask_to_text(final_maze_masked)
+
+
+            globals.path = solver.solve(labirynth, positions[0], positions[1])
+
+            #original_frame = draw_path_on_frame(original_frame, path)
+
+
+        #cv2.imshow('stuff sovled, kinda', original_frame)
 
 
 if __name__ == '__main__':
+
+    t1 = threading.Thread(target=maze_calculation_loop)
+    t1.start()
+
     while True:
 
-        what_the_hell()
+        _, globals.frame1 = cap.read()
+
+        frame1 = show_end_points(frame1)
+
+        cv2.imshow('stuff', draw_path_on_frame())
 
         k = cv2.waitKey(5) & 0xFF
         if k == ord('q'):
+            globals.running = False
+            t1.join()
             cv2.destroyAllWindows()
             break
         elif k == ord('t'):

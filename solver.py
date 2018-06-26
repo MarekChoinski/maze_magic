@@ -22,12 +22,11 @@ def solve(labirynth, i_start, i_end):
 
     path = []
 
-
+    #start = i_start
+    #end = i_end
 
     start = (i_start[1], i_start[0])
     end = (i_end[1], i_end[0])
-    print("S", start[0])
-    print("E", end[1])
 
     path.append(start)
     path.append(end)
@@ -42,7 +41,7 @@ def solve(labirynth, i_start, i_end):
 
     size = len(labirynth)
 
-    print("wielkosc ", size)
+    #print("wielkosc ", size)
 
     # find end and start
     # we search for S and E
@@ -64,7 +63,7 @@ def solve(labirynth, i_start, i_end):
 
     labirynth[end[0]][end[1]] = ' '
 
-    print(start, end)
+    #print(start, end)
 
     # make queue
 
@@ -81,33 +80,35 @@ def solve(labirynth, i_start, i_end):
             find = True
             break
 
-        # up
-        if labirynth[index[0]][index[1]-1] == ' ':
-            labirynth[index[0] ][index[1]-1] = 'd'
-            temp = (index[0] , index[1]-1)
-            queue.append(temp)
+        try:
+            # up
+            if labirynth[index[0]][index[1]-1] == ' ':
+                labirynth[index[0] ][index[1]-1] = 'd'
+                temp = (index[0] , index[1]-1)
+                queue.append(temp)
 
-        # down
-        if labirynth[index[0] ][index[1]+1] == ' ':
-            labirynth[index[0] ][index[1]+1] = 'u'
-            temp = (index[0] , index[1]+1)
-            queue.append(temp)
+            # down
+            if labirynth[index[0] ][index[1]+1] == ' ':
+                labirynth[index[0] ][index[1]+1] = 'u'
+                temp = (index[0] , index[1]+1)
+                queue.append(temp)
 
-        # left
-        if labirynth[index[0]-1][index[1] ] == ' ':
-            labirynth[index[0]-1][index[1] ] = 'r'
-            temp = (index[0]-1, index[1] )
-            queue.append(temp)
+            # left
+            if labirynth[index[0]-1][index[1] ] == ' ':
+                labirynth[index[0]-1][index[1] ] = 'r'
+                temp = (index[0]-1, index[1] )
+                queue.append(temp)
 
-        # right
-        if labirynth[index[0]+1][index[1] ] == ' ':
-            labirynth[index[0]+1][index[1] ] = 'l'
-            temp = (index[0]+1, index[1] )
-            queue.append(temp)
-
+            # right
+            if labirynth[index[0]+1][index[1] ] == ' ':
+                labirynth[index[0]+1][index[1] ] = 'l'
+                temp = (index[0]+1, index[1] )
+                queue.append(temp)
+        except IndexError:
+            return path
     # go through solution
 
-    print("dziala bez kitu xD")
+    #print("dziala bez kitu xD")
 
 
 
