@@ -17,10 +17,6 @@ kernel = np.ones((3, 3), np.uint8)
 
 
 
-
-cap = cv2.VideoCapture(0)
-_, frame1 = cap.read()
-
 def mask_to_text(mask):
     result = [['x' for x in range(len(mask[0]))] for y in range(len(mask))]
 
@@ -34,30 +30,32 @@ def mask_to_text(mask):
     return result
 
 
-def show_end_points(frame):
-    # save normal frame
-    original_frame = frame
+def show_end_points():
+    while globals.running:
 
-    # convert color scale to HSV
-    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
-    # Threshold the HSV image to get only blue colors
-    mask = cv2.inRange(frame, lower_green, upper_green)
 
-    # dilate for better effect
-    mask = cv2.dilate(mask, kernel, iterations=2)
+        # save normal frame
+        frame = copy.copy(globals.frame1)
+        original_frame = frame
 
-    positions = position_of_end_points(mask)
+        # convert color scale to HSV
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
-    if len(positions) == 2:
-        copy_frame = copy.copy(original_frame)
-        cv2.circle(copy_frame, (positions[0][0], positions[0][1]), positions[0][2], (0, 255, 0), -1)
-        cv2.circle(copy_frame, (positions[1][0], positions[1][1]), positions[1][2], (0, 255, 0), -1)
+        # Threshold the HSV image to get only blue colors
+        mask = cv2.inRange(frame, lower_green, upper_green)
 
-        original_frame = cv2.addWeighted(original_frame, 0.7, copy_frame, 0.3, 0)
+        # dilate for better effect
+        mask = cv2.dilate(mask, kernel, iterations=2)
 
-    # original frame is overlayed by detected path
-    return original_frame
+        positions = position_of_end_points(mask)
+
+        if len(positions) == 2:
+            globals.main_circles = np.zeros((len(globals.frame1), len(globals.frame1[0]), 3), np.uint8)
+            copy_frame = globals.main_circles#copy.copy(original_frame)
+            cv2.circle(copy_frame, (positions[0][0], positions[0][1]), positions[0][2], (0, 255, 0), -1)
+            cv2.circle(copy_frame, (positions[1][0], positions[1][1]), positions[1][2], (0, 255, 0), -1)
+
 
 
 # we should find position of end points
@@ -76,7 +74,6 @@ def position_of_end_points(mask):
         sorted_contours = sorted(contours, key=cv2.contourArea)
 
         # find the biggest area point
-        # todo not sure if sorted ascend
         x, y, w, h = cv2.boundingRect(sorted_contours[-2])
         positions.append((int(round(x + (w / 2))), int(round(y + (h / 2))), int(round(max(w, h)))))
         x, y, w, h = cv2.boundingRect(sorted_contours[-1])
@@ -127,21 +124,29 @@ def maze_calculation_loop():
 
 if __name__ == '__main__':
 
+    cap = cv2.VideoCapture(0)
+
     t1 = threading.Thread(target=maze_calculation_loop)
     t1.start()
+
+    t2 = threading.Thread(target=show_end_points)
+    t2.start()
+
+
 
     while True:
 
         _, globals.frame1 = cap.read()
 
+        frame = globals.frame1
+
         #frame = show_end_points(globals.frame1)
 
 
-        frame = cv2.addWeighted(globals.frame1, 1, globals.main_mask, 0.5, 0)
+        frame = cv2.addWeighted(frame, 1, globals.main_mask, 0.5, 0)
+        frame = cv2.addWeighted(frame, 1, globals.main_circles, 0.3, 0)
 
 
-
-        #cv2.imshow('stuff', globals.frame1)
         cv2.imshow('stuff', frame)
 
         k = cv2.waitKey(5) & 0xFF
@@ -149,12 +154,4 @@ if __name__ == '__main__':
             globals.running = False
             t1.join()
             cv2.destroyAllWindows()
-            break
-        elif k == ord('t'):
-            cv2.destroyAllWindows()
-            mazeMagic()
-            break
-        elif k == ord('/'):
-            cv2.destroyAllWindows()
-            what_the_hell()
             break
