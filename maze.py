@@ -1,10 +1,7 @@
 import cv2
 import numpy as np
-from time import sleep
 import copy
 import solver
-
-import globals
 
 import threading
 
