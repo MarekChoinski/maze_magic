@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 
 
 cap = cv2.VideoCapture(0)
@@ -6,7 +7,7 @@ cap = cv2.VideoCapture(0)
 
 path = []
 _, frame1 = cap.read()
-#print(frame1)
+main_mask=  np.zeros((len(frame1), len(frame1[0]), 3), np.uint8)
 
 running = True
 

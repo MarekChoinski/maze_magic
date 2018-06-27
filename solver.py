@@ -113,35 +113,38 @@ def solve(labirynth, i_start, i_end):
 
 
     shortest_path = end
-    if labirynth[shortest_path[0]][shortest_path[1]] == ' ':
-        is_solved = False
-    else:
-        is_solved = True
+    try:
+        if labirynth[shortest_path[0]][shortest_path[1]] == ' ':
+            is_solved = False
+        else:
+            is_solved = True
 
-        path.append(shortest_path)
+            path.append(shortest_path)
 
-        while labirynth[shortest_path[0]][shortest_path[1]] != 'S':
-            # print("paf: ",shortest_path, labirynth[shortest_path[0]][shortest_path[1]])
+            while labirynth[shortest_path[0]][shortest_path[1]] != 'S':
+                # print("paf: ",shortest_path, labirynth[shortest_path[0]][shortest_path[1]])
 
-            if labirynth[shortest_path[0]][shortest_path[1]] == 'u':
-                path.append(shortest_path)
-                labirynth[shortest_path[0]][shortest_path[1]] = 'U'
-                shortest_path = (shortest_path[0] , shortest_path[1]-1)
+                if labirynth[shortest_path[0]][shortest_path[1]] == 'u':
+                    path.append(shortest_path)
+                    labirynth[shortest_path[0]][shortest_path[1]] = 'U'
+                    shortest_path = (shortest_path[0] , shortest_path[1]-1)
 
-            if labirynth[shortest_path[0]][shortest_path[1]] == 'd':
-                path.append(shortest_path)
-                labirynth[shortest_path[0]][shortest_path[1]] = 'D'
-                shortest_path = (shortest_path[0] , shortest_path[1] +1)
+                if labirynth[shortest_path[0]][shortest_path[1]] == 'd':
+                    path.append(shortest_path)
+                    labirynth[shortest_path[0]][shortest_path[1]] = 'D'
+                    shortest_path = (shortest_path[0] , shortest_path[1] +1)
 
-            if labirynth[shortest_path[0]][shortest_path[1]] == 'l':
-                path.append(shortest_path)
-                labirynth[shortest_path[0]][shortest_path[1]] = 'L'
-                shortest_path = (shortest_path[0]-1, shortest_path[1] )
+                if labirynth[shortest_path[0]][shortest_path[1]] == 'l':
+                    path.append(shortest_path)
+                    labirynth[shortest_path[0]][shortest_path[1]] = 'L'
+                    shortest_path = (shortest_path[0]-1, shortest_path[1] )
 
-            if labirynth[shortest_path[0]][shortest_path[1]] == 'r':
-                path.append(shortest_path)
-                labirynth[shortest_path[0]][shortest_path[1]] = 'R'
-                shortest_path = (shortest_path[0]+1, shortest_path[1] )
+                if labirynth[shortest_path[0]][shortest_path[1]] == 'r':
+                    path.append(shortest_path)
+                    labirynth[shortest_path[0]][shortest_path[1]] = 'R'
+                    shortest_path = (shortest_path[0]+1, shortest_path[1] )
+    except IndexError:
+        return path
 
 
     return path
